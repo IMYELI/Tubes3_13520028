@@ -1,4 +1,4 @@
-# usada-dna
+# kobok-dna
 
 ## Project setup
 ```
