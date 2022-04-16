@@ -9,6 +9,7 @@ type TestDNAInput struct {
 	NamaPengguna string
 	SequenceDNA  string
 	NamaPenyakit string
+	StringMatching int
 }
 
 type SearchingInput struct {

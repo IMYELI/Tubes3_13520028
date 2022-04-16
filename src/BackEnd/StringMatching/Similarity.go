@@ -1,4 +1,4 @@
-package Script
+package StringMatching
 
 import "math"
 

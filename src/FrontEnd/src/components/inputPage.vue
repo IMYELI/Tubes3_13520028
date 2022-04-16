@@ -37,9 +37,19 @@
                 <h3>Prediksi Penyakit</h3>
                 <input type="text" v-model="namaPenyakit" class = "menu-option-input" placeholder="<penyakit>">
             </div>
+            <div v-if="showResult">
+                {{tanggal}} - {{namaPengguna}} - {{namaPenyakit}} - {{persentase}}% - {{diagnosis}}
+            </div>
+            <div v-if="showError" style="color:red">
+                {{errorMessage}}
+            </div>
+        </div>
+        <div class = "radio-button">
+            <input type="radio" v-model="isKMP" value = "1">KMP
+            <input type="radio" v-model="isKMP" value = "0">BM
         </div>
         <div class="submit-div">
-            <button>Submit</button>
+            <button @click="tesDNA();showError = false;showResult = false">Submit</button>
         </div>
     </div>
 
@@ -101,7 +111,7 @@
 
 <script>
 // import axios from 'axios';
-const INITIAL_STATUS = 0, UPLOADED_STATUS = 1, SUCCESS_STATUS = 2, FAILED_STATUS = 3, CONVERTING_STATUS = 4;
+import axios from 'axios'
 
 export default {
     
@@ -113,10 +123,17 @@ export default {
             searchDatabase: false,
             uploaded: false,
             queryEntered: false,
+            showResult: false,
+            showError: false,
+            diagnosis: "False",
             namaPengguna: "",
             namaFile: "",
             namaPenyakit: "",
             newPenyakit: "",
+            respPenyakit: "",
+            isiFile: "",
+            tanggal: "",
+            errorMessage: "",
             arrTest: [{index: 1,namaPenyakit: "a",namaFile: "a"},
                         {index: 2,namaPenyakit: "b",namaFile: "b"},
                         {index: 3,namaPenyakit: "c",namaFile: "c"},
@@ -134,30 +151,20 @@ export default {
             highIndex: 5,
             queryLength: 12,
             dataPerPage: 5,
-        }
-    },
-    computed:{          //Pengecekan status upload gambar
-        isInitial(){            
-            return this.statusUpload === INITIAL_STATUS;
-        },
-        isUploaded(){
-            return this.statusUpload === UPLOADED_STATUS;
-        },
-        isSuccess(){
-            return this.statusUpload === SUCCESS_STATUS;
-        },
-        isFailed(){
-            return this.statusUpload === FAILED_STATUS;
-        },
-        isConverting(){
-            return this.statusUpload === CONVERTING_STATUS;
+            persentase: 0,
+            isKMP: 1,
         }
     },
     methods:{
-
         onFileUploaded(listFile){
             this.uploaded = true;
             this.namaFile = listFile[0].name;
+            const fileReader = new FileReader();
+            fileReader.onload = (res) =>{
+                console.log(res.target.result);
+                this.isiFile = res.target.result;
+            };
+            fileReader.readAsText(listFile[0]);
         },
 
         reset(){                   //Digunakan untuk mereset semua state dan server json
@@ -166,13 +173,19 @@ export default {
             this.namaPenyakit = "";
             this.uploaded = false;
             this.queryEntered = false;
+            this.showResult = false;
+            this.showError = false;
+            this.diagnosis = "False";
+            this.persentase = 0;
+            this.isiFile = "";
+            this.tanggal = "";
+            this.isKMP = 1;
         },
 
         nextQuery(){
             if(this.highIndex + this.dataPerPage >this.queryLength && this.queryLength%this.dataPerPage !== 0){
                 this.lowIndex = this.queryLength-this.queryLength%this.dataPerPage;
                 this.highIndex = this.queryLength;
-                console.log("nah")
                 
             }else if(this.highIndex + this.dataPerPage <= this.queryLength){
                 this.lowIndex = this.lowIndex + this.dataPerPage;
@@ -197,10 +210,37 @@ export default {
         searchQuery(){
             this.queryEntered = true;
         },
+        tesDNA() {
+            var data_pass = {"NamaPengguna": this.namaPengguna, "SequenceDNA": this.isiFile, "NamaPenyakit": this.namaPenyakit, "StringMatching": this.isKMP};
+            
+             /*eslint-disable*/
+            axios({ method: "POST", url: "http://localhost:8888/TestDNA", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
+                console.log(result.data)
+                // console.log(data_pass)
+                if(result.data["errors"] != null){
+                    throw new Error(result.data["errors"]);
+                }
+                this.tanggal = result.data["Tanggal"];
+                this.diagnosis = result.data["Diagnosis"];
+                this.persentase = result.data["SkorKesamaan"]
+                // console.log("dontol")
+                /*eslint-enable*/
+                // this.response = result.data;
+                // this.respPenyakit = result.data[""];
+                /*eslint-disable*/
+                // console.log(result.data) 
+                /*eslint-enable*/
+                this.showResult = true;
+                }).catch( error => {
+                    /*eslint-disable*/
+                    console.log(error);
+                    this.errorMessage = error;
+                    this.showError = true;
+                    /*eslint-enable*/
+        })},
         fileSelected(name, listFile){
             this.fileUpload = listFile[0]
             this.namafile = listFile[0].name
-            this.statusUpload = UPLOADED_STATUS
             const fileReader = new FileReader()
             fileReader.readAsDataURL(this.fileUpload)
             console.log(this.percentage)                    
@@ -424,6 +464,10 @@ export default {
         -webkit-text-stroke-width: 0px;
     }
 
+    .radio-button{
+        padding-right: 10px;
+        text-align: center;
+    }
 </style>
 
 
