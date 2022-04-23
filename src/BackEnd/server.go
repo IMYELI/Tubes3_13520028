@@ -1,13 +1,18 @@
 package main
 
 import (
-	// "fmt"
-	// "KobokDNA.com/BackEnd/Script"
-	// "net/http"
+	"fmt"
+
+	"KobokDNA.com/BackEnd/DNA"
 	"KobokDNA.com/BackEnd/Handlers"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
+
+// "net/http"
+// "KobokDNA.com/BackEnd/Handlers"
+// "github.com/gin-contrib/cors"
+// "github.com/gin-gonic/gin"
 
 // var Bulan map[int]string = make(map[int]string { 1 : "Januari",
 // 	2 : "Februari",
@@ -23,22 +28,19 @@ import (
 // 	12 : "Desember",
 // }
 
-
 func main() {
+	var TestDNA DNA.TestDNAInput
 	router := gin.Default()
 	router.Use(cors.Default())
 
-
 	router.POST("/Penyakit", Handlers.PostPenyakit)
 	router.POST("/TestDNA", Handlers.PostTestDNA)
+	fmt.Println("Test DNA :", TestDNA.NamaPengguna, TestDNA.NamaPenyakit, TestDNA.SequenceDNA, TestDNA.Method)
+	// router.GET("/GetTestDNA", Handlers.GetTestDNA)
 	router.POST("/Searching", Handlers.PostSearching)
-	// router.GET("/Penyakit", func(c *gin.Context) {
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"resp": "dontol!!",
-	// 	})
 
-	// })
-	router.Run(":8888")
+	fmt.Println("Hallo")
+	router.Run(":8080")
 	// foundKMP, firstPosKMP, closedMatchKMP := Script.KnuthMorrisPratt("abacaabaccabacabaabb", "abacabb")
 	// if foundKMP {
 	// 	fmt.Printf("Found match at first index: %d\n", firstPosKMP)
@@ -58,5 +60,3 @@ func main() {
 	// 	fmt.Printf("Similarity Value : %d\n", Script.Similarity(len("abacabb"), distance))
 	// }
 }
-
-

@@ -214,12 +214,9 @@ export default {
             var data_pass = {"NamaPengguna": this.namaPengguna, "SequenceDNA": this.isiFile, "NamaPenyakit": this.namaPenyakit, "StringMatching": this.isKMP};
             
              /*eslint-disable*/
-            axios({ method: "POST", url: "http://localhost:8888/TestDNA", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
+            axios({ method: "POST", url: "http://localhost:8080/TestDNA", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
                 console.log(result.data)
                 // console.log(data_pass)
-                if(result.data["errors"] != null){
-                    throw new Error(result.data["errors"]);
-                }
                 this.tanggal = result.data["Tanggal"];
                 this.diagnosis = result.data["Diagnosis"];
                 this.persentase = result.data["SkorKesamaan"]
@@ -233,8 +230,8 @@ export default {
                 this.showResult = true;
                 }).catch( error => {
                     /*eslint-disable*/
-                    console.log(error);
-                    this.errorMessage = error;
+                    console.log(error);      
+                    this.errorMessage = error.response.data["errors"];                 
                     this.showError = true;
                     /*eslint-enable*/
         })},

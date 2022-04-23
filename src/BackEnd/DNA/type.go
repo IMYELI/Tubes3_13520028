@@ -6,10 +6,10 @@ type PenyakitInput struct {
 }
 
 type TestDNAInput struct {
-	NamaPengguna string
+	NamaPengguna string `binding:"required"`
 	SequenceDNA  string
 	NamaPenyakit string
-	StringMatching int
+	Method       int
 }
 
 type SearchingInput struct {

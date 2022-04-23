@@ -2,12 +2,12 @@ package Handlers
 
 import (
 	"fmt"
+	"net/http"
 	"time"
-	"regexp"
+
 	"KobokDNA.com/BackEnd/DNA"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 )
 
 func PostPenyakit(c *gin.Context) {
@@ -17,7 +17,7 @@ func PostPenyakit(c *gin.Context) {
 	if err != nil {
 		errorMessages := []string{}
 		for _, e := range err.(validator.ValidationErrors) {
-			errorMessage := "Error on field " + e.Field() + ", condition: " + e.ActualTag() 
+			errorMessage := "Error on field " + e.Field() + ", condition: " + e.ActualTag()
 			errorMessages = append(errorMessages, errorMessage)
 		}
 	} else {
@@ -37,41 +37,44 @@ func PostPenyakit(c *gin.Context) {
 
 func PostTestDNA(c *gin.Context) {
 	var TestDNA DNA.TestDNAInput
-	
+
 	err := c.ShouldBindJSON(&TestDNA)
 	if err != nil {
 		errorMessages := []string{}
 		for _, e := range err.(validator.ValidationErrors) {
-			errorMessage := "Error on field " + e.Field() + ", condition: " + e.ActualTag() 
+			errorMessage := fmt.Sprintf("Error on field %s, condition : %s", e.Field(), e.ActualTag())
 			errorMessages = append(errorMessages, errorMessage)
 		}
-		c.AbortWithStatusJSON(http.StatusBadRequest, errorMessages)
+		fmt.Println(errorMessages)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errorMessages,
+		})
 	} else {
 		NamaPengguna := TestDNA.NamaPengguna
 		DNApengguna := TestDNA.SequenceDNA
 		NamaPenyakit := TestDNA.NamaPenyakit
-		Method := TestDNA.StringMatching
-		
-		reg1, _ := regexp.Compile("[a-z]")
-		if (reg1.MatchString(DNApengguna)) {
-			errorMessage := "Sequence DNA harus huruf kapital"
-			// c.Error(err)
-			c.JSON(http.StatusOK, gin.H{
+		Method := TestDNA.Method
+
+		errorMessage, err := DNAsequenceValidator(DNApengguna)
+		if err {
+			c.JSON(http.StatusBadRequest, gin.H{
 				"errors": errorMessage,
 			})
-			return
-		}
+		} else {
+			now := time.Now()
+			dateNow := fmt.Sprintf("%d %s %d", now.Day(), Bulan[int(now.Month())], now.Year())
 
-		reg2, _ := regexp.Compile("[^ACGT]")
-		if (reg2.MatchString(DNApengguna)) {
-			errorMessage := "Sequence DNA tidak valid"
-			// c.Error(err)
+			// strlain := "world!!"
+			diagnosis, similarityScore := TestDNAHandler(DNApengguna, NamaPenyakit, Method)
 			c.JSON(http.StatusOK, gin.H{
-				"errors": errorMessage,
+				"Tanggal":      dateNow,
+				"Pengguna":     NamaPengguna,
+				"Penyakit":     NamaPenyakit,
+				"SkorKesamaan": similarityScore,
+				"Diagnosis":    diagnosis,
+				"errors":       nil,
 			})
-			return
 		}
-
 		// if (reg1.MatchString(DNApengguna)) {
 
 		// }
@@ -80,19 +83,6 @@ func PostTestDNA(c *gin.Context) {
 		// 	c.JSON(http.StatusUnauthorized, errorMessage)
 		// }
 
-		now := time.Now()
-		dateNow := fmt.Sprintf("%d %s %d", now.Day(), Bulan[int(now.Month())], now.Year()) 
-
-		// strlain := "world!!"
-		diagnosis, similarityScore := TestDNAHandler(DNApengguna, NamaPenyakit, Method)
-		c.JSON(http.StatusOK, gin.H {
-			"Tanggal" : dateNow,
-			"Pengguna" : NamaPengguna,
-			"Penyakit" : NamaPenyakit,
-			"SkorKesamaan" : similarityScore, 
-			"Diagnosis" : diagnosis,
-			"errors": nil,
-		})
 	}
 }
 
@@ -103,11 +93,11 @@ func PostSearching(c *gin.Context) {
 	if err != nil {
 		errorMessages := []string{}
 		for _, e := range err.(validator.ValidationErrors) {
-			errorMessage := "Error on field " + e.Field() + ", condition: " + e.ActualTag() 
+			errorMessage := "Error on field " + e.Field() + ", condition: " + e.ActualTag()
 			errorMessages = append(errorMessages, errorMessage)
 		}
 	} else {
-		c.JSON(http.StatusOK, gin.H {
+		c.JSON(http.StatusOK, gin.H{
 			"hello": "world!!",
 		})
 	}
