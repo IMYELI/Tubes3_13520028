@@ -1,12 +1,13 @@
 package main
 
 import (
+	// "KobokDNA.com/Modules"
+	// "KobokDNA.com/Handlers"
 	"fmt"
+	"log"
 
-	"KobokDNA.com/BackEnd/DNA"
-	"KobokDNA.com/BackEnd/Handlers"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	"KobokDNA.com/Helper/GlobalVar"
+	"KobokDNA.com/Routes/ver1"
 )
 
 // "net/http"
@@ -29,18 +30,26 @@ import (
 // }
 
 func main() {
-	var TestDNA DNA.TestDNAInput
-	router := gin.Default()
-	router.Use(cors.Default())
+	err := GlobalVar.Init()
 
-	router.POST("/Penyakit", Handlers.PostPenyakit)
-	router.POST("/TestDNA", Handlers.PostTestDNA)
-	fmt.Println("Test DNA :", TestDNA.NamaPengguna, TestDNA.NamaPenyakit, TestDNA.SequenceDNA, TestDNA.Method)
-	// router.GET("/GetTestDNA", Handlers.GetTestDNA)
-	router.POST("/Searching", Handlers.PostSearching)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	defer GlobalVar.MongoDB.Disconnect(GlobalVar.Ctx)
+	// var TestDNA DNA.TestDNAInput
+	// router := gin.Default()
+	// router.Use(cors.Default())
+	ver1.Routes()
+	// router.POST("/Penyakit", Handlers.PostPenyakit)
+	// router.POST("/TestDNA", Handlers.PostTestDNA)
+	// // fmt.Println("Test DNA :", TestDNA.NamaPengguna, TestDNA.NamaPenyakit, TestDNA.SequenceDNA, TestDNA.Method)
+	// // router.GET("/GetTestDNA", Handlers.GetTestDNA)
+	// router.POST("/Searching", Handlers.PostSearching)
 
 	fmt.Println("Hallo")
-	router.Run(":8080")
+	GlobalVar.Server.Run(":8080")
 	// foundKMP, firstPosKMP, closedMatchKMP := Script.KnuthMorrisPratt("abacaabaccabacabaabb", "abacabb")
 	// if foundKMP {
 	// 	fmt.Printf("Found match at first index: %d\n", firstPosKMP)

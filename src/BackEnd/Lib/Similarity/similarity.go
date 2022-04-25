@@ -1,4 +1,4 @@
-package StringMatching
+package Similarity
 
 import (
 	"fmt"
@@ -67,18 +67,17 @@ func CosineSimilarity(DNApengguna string, DNApenyakit string) float64 {
 	}
 }
 
-func SimilarityScore(DNApengguna string, DNApenyakit string) float64 {
+func SimilarityScore(DNApengguna string, DNApenyakit string) int {
 	n := len(DNApengguna)
 	m := len(DNApenyakit)
 
 	idxFirst := 0
 	idxLast := m
-	diff := n
+	diff := m
 
 	for {
-		fmt.Println(DNApengguna[idxFirst:idxLast])
-		fmt.Println(DNApenyakit)
 		tempDiff := HammingDistance(DNApengguna[idxFirst:idxLast], DNApenyakit)
+		fmt.Println(tempDiff)
 		if tempDiff < diff && tempDiff != -1 {
 			diff = tempDiff
 		}
@@ -88,7 +87,7 @@ func SimilarityScore(DNApengguna string, DNApenyakit string) float64 {
 			break
 		}
 	}
-	return float64(1 - float64(diff)/float64(n))
+	return int((1 - float64(diff)/float64(m)) * 100)
 }
 
 func stringToVector(SequenceDNA string) map[byte]int {

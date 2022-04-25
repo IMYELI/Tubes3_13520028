@@ -2,7 +2,7 @@ package StringMatching
 
 import "math"
 
-func KnuthMorrisPratt(DNApengguna string, DNApenyakit string) (bool, string) {
+func KnuthMorrisPratt(DNApengguna string, DNApenyakit string) bool {
 	n := len(DNApengguna)
 	m := len(DNApenyakit)
 
@@ -16,7 +16,7 @@ func KnuthMorrisPratt(DNApengguna string, DNApenyakit string) (bool, string) {
 	for i < n {
 		if DNApengguna[i] == DNApenyakit[j] {
 			if j == m-1 {
-				return true, DNApenyakit
+				return true
 			}
 			i++
 			j++
@@ -29,7 +29,8 @@ func KnuthMorrisPratt(DNApengguna string, DNApenyakit string) (bool, string) {
 			i++
 		}
 	}
-	return false, string(DNApenyakit[:matchMax])
+	// , string(DNApenyakit[:matchMax])
+	return false
 }
 
 func border(DNApenyakit string) []int {
@@ -56,7 +57,7 @@ func border(DNApenyakit string) []int {
 	return border
 }
 
-func BoyerMoore(DNApengguna string, DNApenyakit string) (bool, string) {
+func BoyerMoore(DNApengguna string, DNApenyakit string) bool {
 	IdxLastOccurChar := idxChar(DNApenyakit)
 	n := len(DNApengguna)
 	m := len(DNApenyakit)
@@ -67,7 +68,7 @@ func BoyerMoore(DNApengguna string, DNApenyakit string) (bool, string) {
 	for {
 		if DNApengguna[i] == DNApenyakit[j] {
 			if j == 0 {
-				return true, DNApenyakit
+				return true
 			}
 			i--
 			j--
@@ -83,7 +84,8 @@ func BoyerMoore(DNApengguna string, DNApenyakit string) (bool, string) {
 			break
 		}
 	}
-	return false, DNApenyakit[idxMatchMax+1 : m]
+	// , DNApenyakit[idxMatchMax+1 : m]
+	return false
 }
 
 func idxChar(DNApenyakit string) map[byte]int {

@@ -38,7 +38,7 @@
                 <input type="text" v-model="namaPenyakit" class = "menu-option-input" placeholder="<penyakit>">
             </div>
             <div v-if="showResult">
-                {{tanggal}} - {{namaPengguna}} - {{namaPenyakit}} - {{persentase}}% - {{diagnosis}}
+                {{resultTanggal}} - {{resultNamaPengguna}} - {{resultNamaPenyakit}} - {{persentase}}% - {{diagnosis}}
             </div>
             <div v-if="showError" style="color:red">
                 {{errorMessage}}
@@ -61,7 +61,7 @@
         <div class="input-option-wrapper">
             <div class = "input-option">
                 <h3>Nama Penyakit</h3>
-                <input type="text" v-model="namaPengguna" class = "menu-option-input" placeholder="<penyakit>">
+                <input type="text" v-model="newPenyakit" class = "menu-option-input" placeholder="<penyakit>">
             </div>
             <div class = "input-option">
                 <h3>Upload Sequence</h3>
@@ -75,10 +75,16 @@
                     </a>
                 </label>
             </div>
+            <div v-if="showResult" style="color:green">
+                {{succMessage}}
+            </div>
+            <div v-if="showError" style="color:red">
+                {{errorMessage}}
+            </div>
         </div>
         
         <div class="submit-div">
-            <button>Submit</button>
+            <button @click="addDisease();showError = false;showResult = false">Submit</button>
         </div>
     </div>
 
@@ -86,24 +92,37 @@
     <div v-if="searchDatabase" action="" class = "box-wrapper">
        <button @click="{mainMenu = true; searchDatabase = false; reset()}" class="back-button">back</button>
         <h1 style="margin-bottom: 20px;">
-            Search Database
+            Search Predictions
         </h1>
         <div class="input-option-wrapper">
-            <input type="text" class="database-search-input" @keyup.enter="searchQuery()">
+            <div class = "input-option">
+                <input type="text" v-model="searchQueryInput" class="database-search-input" @keyup.enter="searchQuery(); showError = false; showResult = false">
+            </div>
+            <div v-if="showError" style="color:red">
+                {{errorMessage}}
+            </div>
         </div>
         <div v-if="queryEntered">
-            <ul>
-                <li v-for="item in arrTest.slice(lowIndex,highIndex)" :key="item.index" class="hasil-query">
-                    {{item.namaPenyakit}}
-                </li>
-            </ul>
-            <div class="input-option-wrapper">
-                <button class="prev-next-button" @click="prevQuery()">
-                    &lt;
-                </button>
-                <button class="prev-next-button" @click="nextQuery()">
-                    &gt;
-                </button>
+            <div v-if="showResult">
+                <ul>
+                    <li v-for="item in arrPenyakit.slice(lowIndex,highIndex)" :key="item.index" class="hasil-query">
+                        <div class = "data-hasil-query">
+                            {{item.date}} - {{item.user_name}} - {{item.disease_name}} - {{item.similarity_score}}% - {{item.status ? "True" : "False"}}
+                        </div>
+                    </li>
+                </ul>
+                <div class="next-prev-wrapper">
+                    <div v-if="displayPrev">
+                        <button class="prev-next-button" @click="prevQuery()">
+                            &lt;
+                        </button>
+                    </div>
+                    <div v-if="displayNext">
+                        <button class="prev-next-button" @click="nextQuery()">
+                            &gt;
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -125,7 +144,10 @@ export default {
             queryEntered: false,
             showResult: false,
             showError: false,
+            displayPrev: false,
+            displayNext: false,
             diagnosis: "False",
+            searchQueryInput: "",
             namaPengguna: "",
             namaFile: "",
             namaPenyakit: "",
@@ -134,7 +156,13 @@ export default {
             isiFile: "",
             tanggal: "",
             errorMessage: "",
-            arrTest: [{index: 1,namaPenyakit: "a",namaFile: "a"},
+            succMessage: "",
+            resultTanggal: "",
+            resultNamaPengguna: "",
+            resultNamaPenyakit: "",
+            persentase: 0,
+            isKMP: "1",
+            arrPenyakit: [{index: 1,namaPenyakit: "a",namaFile: "a"},
                         {index: 2,namaPenyakit: "b",namaFile: "b"},
                         {index: 3,namaPenyakit: "c",namaFile: "c"},
                         {index: 4,namaPenyakit: "d",namaFile: "d"},
@@ -149,10 +177,8 @@ export default {
                         ],
             lowIndex: 0,
             highIndex: 5,
-            queryLength: 12,
+            queryLength: 0,
             dataPerPage: 5,
-            persentase: 0,
-            isKMP: 1,
         }
     },
     methods:{
@@ -171,17 +197,120 @@ export default {
             this.namaPengguna = "";
             this.namaFile = "";
             this.namaPenyakit = "";
+            this.searchQueryInput = "";
             this.uploaded = false;
             this.queryEntered = false;
             this.showResult = false;
             this.showError = false;
             this.diagnosis = "False";
             this.persentase = 0;
+            this.newPenyakit = "";
             this.isiFile = "";
             this.tanggal = "";
-            this.isKMP = 1;
+            this.isKMP = "1";
         },
 
+        tesDNA() {
+            var data_pass = {"user_name": this.namaPengguna, "user_DNA_sequence": this.isiFile, "disease_name": this.namaPenyakit, "method": this.isKMP};
+             /*eslint-disable*/
+            axios({ method: "POST", url: "http://localhost:8080/v1/testDNA/test", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
+                console.log(result.data["message"])
+
+                if (result.data["message"] == "success adding a result") {
+                    var query = "?id=" + result.data["id"];
+                    axios({ method: "GET", url: "http://localhost:8080/v1/testDNA/result"+query, headers: {"content-type": "text/plain" } }).then(result => { 
+                    console.log(result)
+                    this.resultTanggal = result.data["date"];
+                    this.resultNamaPengguna = result.data["user_name"];
+                    this.resultNamaPenyakit = result.data["disease_name"];
+                    this.persentase = result.data["similarity_score"];
+                    this.diagnosis = result.data["status"];
+                    this.showResult = true;
+                    }).catch( error => {
+                        console.log(error);      
+                        this.errorMessage = error.response.data["message"];                 
+                        this.showError = true;
+                })}           
+
+                }).catch( error => {
+                    /*eslint-disable*/
+                    console.log(error);      
+                    this.errorMessage = error.response.data["message"];                 
+                    this.showError = true;
+                    /*eslint-enable*/
+        })},
+
+        addDisease(){
+            var data_pass = {"disease_name": this.newPenyakit, "disease_sequence_DNA": this.isiFile};
+            this.addPenyakit = true;
+
+            axios({ method: "POST", url: "http://localhost:8080/v1/disease/add", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
+                    console.log(result.data["message"])
+                    // console.log(data_pass)
+                    this.succMessage = result.data["message"];
+                    // console.log("dontol")
+                    /*eslint-enable*/
+                    // this.response = result.data;
+                    // this.respPenyakit = result.data[""];
+                    /*eslint-disable*/
+                    // console.log(result.data) 
+                    /*eslint-enable*/
+                    this.showResult = true;
+                    }).catch( error => {
+                        /*eslint-disable*/
+                        console.log(error);      
+                        this.errorMessage = error.response.data["message"];                 
+                        this.showError = true;
+                        /*eslint-enable*/
+            })},
+
+        searchQuery(){
+            if (this.searchQueryInput == "") {
+                this.queryEntered = false;
+            } else {
+                var splitInput = this.searchQueryInput.split(" ");
+                var valid = false;
+                if (splitInput.length == 4) {
+                    this.tanggal = String(splitInput[0] + " " + splitInput[1] + " " + splitInput[2]);
+                    this.namaPenyakit = String(splitInput[3]);
+                    valid = true;
+                } else if (splitInput.length == 2) {
+                    this.tanggal = String(splitInput[0]);
+                    this.namaPenyakit = String(splitInput[1]);
+                    valid = true;
+                }
+                
+                if (valid) {
+                    var query = "?date=" + this.tanggal + "&disease_name=" + this.namaPenyakit;
+                    console.log(this.tanggal)
+                    console.log(this.namaPenyakit)
+                        axios({ method: "GET", url: "http://localhost:8080/v1/searching/predictionResult"+query, headers: {"content-type": "text/plain" } }).then(result => { 
+                        console.log(result)
+                        this.queryEntered = true;
+                        this.arrPenyakit = result.data["predictions"];
+                        this.queryLength = result.data["predictions"].length;
+                        if (this.queryLength > this.dataPerPage) {
+                            this.displayNext = true;
+                        }
+                        // console.log(data_pass)
+                        // console.log("dontol")
+                        /*eslint-enable*/
+                        // this.response = result.data;
+                        // this.respPenyakit = result.data[""];
+                        /*eslint-disable*/
+                        // console.log(result.data) 
+                        /*eslint-enable*/
+                        this.showResult = true;
+                        }).catch( error => {
+                            /*eslint-disable*/
+                            console.log(error);      
+                            this.errorMessage = error.response.data["message"];                 
+                            this.showError = true;
+                            /*eslint-enable*/
+                })}
+            }
+            
+        },
         nextQuery(){
             if(this.highIndex + this.dataPerPage >this.queryLength && this.queryLength%this.dataPerPage !== 0){
                 this.lowIndex = this.queryLength-this.queryLength%this.dataPerPage;
@@ -191,8 +320,8 @@ export default {
                 this.lowIndex = this.lowIndex + this.dataPerPage;
                 this.highIndex = this.highIndex + this.dataPerPage;
             }
+            this.displayPrevNext()
         },
-
         prevQuery(){
             if(this.lowIndex - this.dataPerPage < 0){
                 this.lowIndex = 0;
@@ -206,35 +335,23 @@ export default {
                 this.lowIndex = this.lowIndex - this.dataPerPage;
                 this.highIndex = this.highIndex - this.dataPerPage;
             }
+            this.displayPrevNext()
         },
-        searchQuery(){
-            this.queryEntered = true;
+
+        displayPrevNext() {
+            console.log(this.lowIndex)
+            console.log(this.highIndex + this.dataPerPage)
+            if (this.lowIndex + this.dataPerPage > this.queryLength) {
+                this.displayNext = false;
+            } else {
+                this.displayNext = true;
+            }
+            if (this.lowIndex < 5) {
+                this.displayPrev = false;
+            } else {
+                this.displayPrev = true;
+            }
         },
-        tesDNA() {
-            var data_pass = {"NamaPengguna": this.namaPengguna, "SequenceDNA": this.isiFile, "NamaPenyakit": this.namaPenyakit, "StringMatching": this.isKMP};
-            
-             /*eslint-disable*/
-            axios({ method: "POST", url: "http://localhost:8080/TestDNA", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
-                console.log(result.data)
-                // console.log(data_pass)
-                this.tanggal = result.data["Tanggal"];
-                this.diagnosis = result.data["Diagnosis"];
-                this.persentase = result.data["SkorKesamaan"]
-                // console.log("dontol")
-                /*eslint-enable*/
-                // this.response = result.data;
-                // this.respPenyakit = result.data[""];
-                /*eslint-disable*/
-                // console.log(result.data) 
-                /*eslint-enable*/
-                this.showResult = true;
-                }).catch( error => {
-                    /*eslint-disable*/
-                    console.log(error);      
-                    this.errorMessage = error.response.data["errors"];                 
-                    this.showError = true;
-                    /*eslint-enable*/
-        })},
         fileSelected(name, listFile){
             this.fileUpload = listFile[0]
             this.namafile = listFile[0].name
@@ -362,6 +479,11 @@ export default {
         text-align: center;
     }
 
+    .next-prev-wrapper{
+        display: flex;
+        justify-content: center;
+    }
+
     .input-option{
         display: inline-block;
         margin: 20px;
@@ -416,8 +538,8 @@ export default {
         max-width: 300px;
         max-height: 50px;
         padding: 0px 15px;
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 25px;
+        font-size: 20px;
+        text-align:center;
     }
     
     .prev-next-button{
@@ -425,6 +547,7 @@ export default {
         color: white;
         border-radius: 10px;
         font-size: 25px;
+        margin-left: 5px;
         border: 1px solid black;
     }
 
@@ -433,7 +556,12 @@ export default {
         padding: 5px;
         border: 2px solid black;
         border-radius: 7px;
-        margin: 10px 0px;
+        margin: 10px;
+    }
+
+    .data-hasil-query{
+        font-size: 20px;
+        text-align: center;
     }
 
     .submit-div{
