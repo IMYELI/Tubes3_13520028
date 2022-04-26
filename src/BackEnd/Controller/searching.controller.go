@@ -15,6 +15,7 @@ import (
 func GetAllPrediction(ctx *gin.Context) {
 	date := ctx.Query("date")
 	diseaseName := ctx.Query("disease_name")
+
 	valid_date := "DD/MM/YYYY or DD-MM-YYYY or DD MM YYYY"
 
 	str_date := strings.Split(date, "-")

@@ -9,7 +9,14 @@ import (
 
 func AllPrediction(diseaseName *string, date *string) ([]Modules.Result, error) {
 	var results []Modules.Result
+	
 	filter := bson.D{bson.E{Key: "disease_name", Value: diseaseName}, bson.E{Key: "date", Value: date}}
+
+	if *diseaseName == "" {
+		filter = bson.D{bson.E{Key: "date", Value: date}}
+	} else if *date == "" {
+		filter = bson.D{bson.E{Key: "disease_name", Value: diseaseName}}
+	} 
 
 	cursor, err := GlobalVar.ResultCollection.Find(GlobalVar.Ctx, filter)
 	if err != nil {
