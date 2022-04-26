@@ -3,7 +3,7 @@ package main
 import (
 	// "KobokDNA.com/Models"
 	// "KobokDNA.com/Handlers"
-	"fmt"
+
 	"log"
 
 	"KobokDNA.com/Routes/ver1"
@@ -47,8 +47,6 @@ func main() {
 	// // fmt.Println("Test DNA :", TestDNA.NamaPengguna, TestDNA.NamaPenyakit, TestDNA.SequenceDNA, TestDNA.Method)
 	// // router.GET("/GetTestDNA", Handlers.GetTestDNA)
 	// router.POST("/Searching", Handlers.PostSearching)
-
-	fmt.Println("Hallo")
 	GlobalVar.Server.Run()
 	// foundKMP, firstPosKMP, closedMatchKMP := Script.KnuthMorrisPratt("abacaabaccabacabaabb", "abacabb")
 	// if foundKMP {
