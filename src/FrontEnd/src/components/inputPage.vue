@@ -97,7 +97,7 @@
         </h1>
         <div class="input-option-wrapper">
             <div class = "input-option">
-                <input type="text" v-model="searchQueryInput" class="database-search-input" @keyup.enter="searchQuery(); showError = false; showResult = false">
+                <input type="text" v-model="searchQueryInput" class="database-search-input" @keyup.enter="searchQuery(); showError = false; showResult = false; namaPenyakit = ''; tanggal = ''">
             </div>
             <div v-if="showError" style="color:red">
                 {{errorMessage}}
@@ -267,24 +267,56 @@ export default {
                 this.queryEntered = false;
             } else {
                 var splitInput = this.searchQueryInput.split(" ");
+                var onlyName = false;
                 var valid = false;
+                var bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                
+                if (splitInput.length == 1) {
+                    onlyName = true;
+                }
+
                 if (splitInput.length >= 4) {
-                    this.tanggal = String(splitInput[0] + " " + splitInput[1] + " " + splitInput[2]);
-                    for (let i = 3; i < splitInput.length; i++) {
-                        this.namaPenyakit += String(splitInput[i]);
-                        if (i != splitInput.length - 1) {
-                            this.namaPenyakit +=  " "
+                    if (bulan.includes(splitInput[1])) {
+                        this.tanggal = splitInput[0] + " " + splitInput[1] + " " + splitInput[2];
+                        for (let i = 3; i < splitInput.length; i++) {
+                            this.namaPenyakit += splitInput[i];
+                            if (i != splitInput.length - 1) {
+                                this.namaPenyakit +=  " "
+                            }
                         }
+                        valid = true;
+                    } else {
+                        onlyName = false;
                     }
-                    valid = true;
-                } else if (splitInput.length == 2) {
-                    this.tanggal = String(splitInput[0]);
-                    this.namaPenyakit = String(splitInput[1]);
-                    valid = true;
-                } else if (splitInput.length == 3) {
-                    this.tanggal = String(splitInput[0] + " " + splitInput[1] + " " + splitInput[2]);
-                    valid = true;
-                } else {
+                } 
+                
+                if (splitInput.length >= 2 && valid == false) {
+                    this.tanggal = splitInput[0];
+                    if (this.tanggal.split("-").length == 3 || this.namaPenyakit.split("/").length == 3) {
+                        for (let i = 1; i < splitInput.length; i++) {
+                            this.namaPenyakit += String(splitInput[i]);
+                            if (i != splitInput.length - 1) {
+                                this.namaPenyakit +=  " "
+                            }
+                        }
+                        valid = true;
+                    } else {
+                        this.tanggal = "";
+                        onlyName = true;
+                    }
+                } 
+                
+                if (splitInput.length == 3 && valid == false) {
+                    if (bulan.includes(splitInput[1])) {
+                        this.tanggal = splitInput[0] + " " + splitInput[1] + " " + splitInput[2];
+                        valid = true;
+                    } else {
+                        this.tanggal = "";
+                        onlyName = true
+                    }
+                } 
+
+                if (onlyName && valid == false) {
                     for (let i = 0; i < splitInput.length; i++) {
                         this.namaPenyakit += splitInput[i]
                         if (i != splitInput.length - 1) {
@@ -293,29 +325,26 @@ export default {
                     }
                 }
 
-                if (valid) {
-                    var query = "?date=" + this.tanggal + "&disease_name=" + this.namaPenyakit;
-                    console.log(this.tanggal)
-                    console.log(this.namaPenyakit)
-                        axios({ method: "GET", url: "http://localhost:8080/v1/searching/predictionResult"+query, headers: {"content-type": "text/plain" } }).then(result => { 
-                        console.log(result)
-                        this.queryEntered = true;
-                        this.arrPenyakit = result.data["predictions"];
-                        this.queryLength = result.data["predictions"].length;
-                        if (this.queryLength > this.dataPerPage) {
-                            this.displayNext = true;
-                        }
+                var query = "?date=" + this.tanggal + "&disease_name=" + this.namaPenyakit;
+                console.log(this.tanggal)
+                console.log(this.namaPenyakit)
+                    axios({ method: "GET", url: "http://localhost:8080/v1/searching/predictionResult"+query, headers: {"content-type": "text/plain" } }).then(result => { 
+                    console.log(result)
+                    this.queryEntered = true;
+                    this.arrPenyakit = result.data["predictions"];
+                    this.queryLength = result.data["predictions"].length;
 
-                        this.showResult = true;
-                        }).catch( error => {
-                            /*eslint-disable*/
-                            console.log(error);      
-                            this.errorMessage = error.response.data["message"];                 
-                            this.showError = true;
-                            /*eslint-enable*/
+                    if (this.queryLength > this.dataPerPage) {
+                        this.displayNext = true;
+                    }
+
+                    this.showResult = true;
+                    }).catch( error => {
+                        /*eslint-disable*/
+                        console.log(error);      
+                        /*eslint-enable*/
                 })}
-            }
-            this.displayPrevNext();
+                this.displayPrevNext();
             
         },
         nextQuery(){
@@ -346,7 +375,10 @@ export default {
         },
 
         displayPrevNext() {
-            if (this.lowIndex + this.dataPerPage > this.queryLength) {
+            console.log(this.lowIndex)
+            console.log(this.lowIndex + this.dataPerPage)
+            console.log(this.queryLength)
+            if (this.lowIndex + this.dataPerPage >= this.queryLength) {
                 this.displayNext = false;
             } else {
                 this.displayNext = true;
