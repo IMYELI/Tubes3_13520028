@@ -164,7 +164,7 @@ export default {
             resultNamaPenyakit: "",
             persentase: 0,
             isKMP: "1",
-            port: "https://kobokdna.herokuapp.com" || "http://localhost:8080",
+            port: "https://kobokdna.herokuapp.com",
             arrPenyakit: [{index: 1,namaPenyakit: "a",namaFile: "a"},
                         {index: 2,namaPenyakit: "b",namaFile: "b"},
                         {index: 3,namaPenyakit: "c",namaFile: "c"},
@@ -267,66 +267,8 @@ export default {
             if (this.searchQueryInput == "") {
                 this.queryEntered = false;
             } else {
-                var splitInput = this.searchQueryInput.split(" ");
-                var onlyName = false;
-                var valid = false;
-                var bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                
-                if (splitInput.length == 1) {
-                    onlyName = true;
-                }
 
-                if (splitInput.length >= 4) {
-                    if (bulan.includes(splitInput[0]) || bulan.includes(splitInput[1]) || bulan.includes(splitInput[2])) {
-                        this.tanggal = splitInput[0] + " " + splitInput[1] + " " + splitInput[2];
-                        for (let i = 3; i < splitInput.length; i++) {
-                            this.namaPenyakit += splitInput[i];
-                            if (i != splitInput.length - 1) {
-                                this.namaPenyakit +=  " "
-                            }
-                        }
-                        valid = true;
-                    } else {
-                        onlyName = false;
-                    }
-                } 
-                
-                if (splitInput.length >= 2 && valid == false) {
-                    this.tanggal = splitInput[0];
-                    if (this.tanggal.split("-").length == 3 || this.namaPenyakit.split("/").length == 3) {
-                        for (let i = 1; i < splitInput.length; i++) {
-                            this.namaPenyakit += String(splitInput[i]);
-                            if (i != splitInput.length - 1) {
-                                this.namaPenyakit +=  " "
-                            }
-                        }
-                        valid = true;
-                    } else {
-                        this.tanggal = "";
-                        onlyName = true;
-                    }
-                } 
-                
-                if (splitInput.length == 3 && valid == false) {
-                    if (bulan.includes(splitInput[0]) || bulan.includes(splitInput[1]) || bulan.includes(splitInput[2])) {
-                        this.tanggal = splitInput[0] + " " + splitInput[1] + " " + splitInput[2];
-                        valid = true;
-                    } else {
-                        this.tanggal = "";
-                        onlyName = true
-                    }
-                } 
-
-                if (onlyName && valid == false) {
-                    for (let i = 0; i < splitInput.length; i++) {
-                        this.namaPenyakit += splitInput[i]
-                        if (i != splitInput.length - 1) {
-                            this.namaPenyakit +=  " "
-                        }
-                    }
-                }
-
-                var query = "?date=" + this.tanggal + "&disease_name=" + this.namaPenyakit;
+                var query = "?query=" + this.searchQueryInput;
                 console.log(this.tanggal)
                 console.log(this.namaPenyakit)
                 console.log(this.port)

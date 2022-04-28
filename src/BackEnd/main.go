@@ -1,14 +1,14 @@
 package main
 
 import (
-	// "KobokDNA.com/Models"
-	// "KobokDNA.com/Handlers"
-
 	"log"
 
 	"KobokDNA.com/Routes/ver1"
 	"KobokDNA.com/Utils/GlobalVar"
 )
+
+// "KobokDNA.com/Models"
+// "KobokDNA.com/Handlers"
 
 // "net/http"
 // "KobokDNA.com/BackEnd/Handlers"
@@ -30,6 +30,7 @@ import (
 // }
 
 func main() {
+
 	err := GlobalVar.Init()
 
 	if err != nil {

@@ -8,13 +8,12 @@ import (
 )
 
 func GetAllPrediction(ctx *gin.Context) {
-	date := ctx.Query("date")
-	diseaseName := ctx.Query("disease_name")
+	query := ctx.Query("query")
 
 	// fmt.Println(date_in_database)
 	// fmt.Println("Type : ", types)
 
-	results, err := Service.AllPrediction(&diseaseName, &date)
+	results, err := Service.AllPrediction(&query)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
