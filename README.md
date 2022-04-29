@@ -27,7 +27,8 @@
 
 
 ## Screenshots
-![Example screenshot](./img/screenshot.png)
+![image](https://user-images.githubusercontent.com/74661051/165987656-3511b584-5439-41ab-8893-cd093546f3ac.png)
+
 
 ## Setup
 - Install node js
