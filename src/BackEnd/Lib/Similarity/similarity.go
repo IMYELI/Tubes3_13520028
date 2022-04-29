@@ -4,6 +4,11 @@ import (
 	"math"
 )
 
+/*
+	Fungsi untuk mencari distance dari 2 string dengan melihat penambahan,
+	pengurangan, dan substitusi
+*/
+
 func damerauLevenshteinDistance(DNApengguna string, DNApenyakit string) int {
 	n := len(DNApengguna) + 1
 	m := len(DNApenyakit) + 1

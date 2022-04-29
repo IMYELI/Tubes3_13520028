@@ -17,7 +17,6 @@ import (
 
 func TestDNA(TestData Models.TestData) (int, error) {
 
-	// cari di database
 	userName := TestData.UserName
 	userDNA := TestData.DNASequence
 	diseaseName := TestData.DiseaseName
@@ -31,7 +30,6 @@ func TestDNA(TestData Models.TestData) (int, error) {
 	dateNow := fmt.Sprintf("%d %s %d", now.Day(), GlobalVar.Bulan[int(now.Month())], now.Year())
 
 	diagnosis := false
-	// var closedMatch string
 	similarityScore := 0
 	DiseaseDNA, err := getDisease(&diseaseName)
 
