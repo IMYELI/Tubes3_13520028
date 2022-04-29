@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <div v-if="addPenyakit" @submit.prevent="addPenyakit" action="" class = "box-wrapper">
+    <div v-if="addPenyakit" @submit.prevent="compress" action="" class = "box-wrapper">
         <button @click="{mainMenu = true; addPenyakit = false; reset()}" class="back-button">back</button>
         <h1 style="margin-bottom: 20px;">
             Tambah Penyakit
@@ -164,7 +164,7 @@ export default {
             resultNamaPenyakit: "",
             persentase: 0,
             isKMP: "1",
-            port: "http://localhost:8080",
+            port: "https://kobokdna.herokuapp.com",
             arrPenyakit: [{index: 1,namaPenyakit: "a",namaFile: "a"},
                         {index: 2,namaPenyakit: "b",namaFile: "b"},
                         {index: 3,namaPenyakit: "c",namaFile: "c"},
