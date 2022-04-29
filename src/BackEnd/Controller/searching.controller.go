@@ -10,9 +10,6 @@ import (
 func GetAllPrediction(ctx *gin.Context) {
 	query := ctx.Query("query")
 
-	// fmt.Println(date_in_database)
-	// fmt.Println("Type : ", types)
-
 	results, err := Service.AllPrediction(&query)
 
 	if err != nil {
@@ -23,8 +20,3 @@ func GetAllPrediction(ctx *gin.Context) {
 		"predictions": results,
 	})
 }
-
-// func searchingDNARoutes(rg *gin.RouterGroup) {
-// 	disease_route := rg.Group("/searching")
-// 	disease_route.GET("/predictionResult", GetTestResult)
-// }

@@ -12,7 +12,7 @@
         </div>
     </div>
     
-    <div v-if="testDNA" @submit.prevent="compress" action="" class = "box-wrapper">
+    <div v-if="testDNA" @submit.prevent="tesDNA" action="" class = "box-wrapper">
         <button @click="{mainMenu = true; testDNA = false; reset()}" class="back-button">back</button>
         <h1 style="margin-bottom: 20px;">
             Test DNA
@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <div v-if="addPenyakit" @submit.prevent="compress" action="" class = "box-wrapper">
+    <div v-if="addPenyakit" @submit.prevent="addPenyakit" action="" class = "box-wrapper">
         <button @click="{mainMenu = true; addPenyakit = false; reset()}" class="back-button">back</button>
         <h1 style="margin-bottom: 20px;">
             Tambah Penyakit
@@ -164,7 +164,7 @@ export default {
             resultNamaPenyakit: "",
             persentase: 0,
             isKMP: "1",
-            port: "https://kobokdna.herokuapp.com",
+            port: "http://localhost:8080",
             arrPenyakit: [{index: 1,namaPenyakit: "a",namaFile: "a"},
                         {index: 2,namaPenyakit: "b",namaFile: "b"},
                         {index: 3,namaPenyakit: "c",namaFile: "c"},
@@ -190,7 +190,6 @@ export default {
             this.namaFile = listFile[0].name;
             const fileReader = new FileReader();
             fileReader.onload = (res) =>{
-                console.log(res.target.result);
                 this.isiFile = res.target.result;
             };
             fileReader.readAsText(listFile[0]);
@@ -215,32 +214,25 @@ export default {
 
         tesDNA() {
             var data_pass = {"user_name": this.namaPengguna, "user_DNA_sequence": this.isiFile, "disease_name": this.namaPenyakit, "method": this.isKMP};
-             /*eslint-disable*/
             axios({ method: "POST", url: this.port+"/v1/testDNA/test", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
-                console.log(result.data["message"])
 
                 if (result.data["message"] == "success adding a result") {
                     var query = "?id=" + result.data["id"];
                     axios({ method: "GET", url: this.port+"/v1/testDNA/result"+query, headers: {"content-type": "text/plain" } }).then(result => { 
-                    console.log(result)
                     this.resultTanggal = result.data["date"];
                     this.resultNamaPengguna = result.data["user_name"];
                     this.resultNamaPenyakit = result.data["disease_name"];
                     this.persentase = result.data["similarity_score"];
                     this.diagnosis = result.data["status"];
                     this.showResult = true;
-                    }).catch( error => {
-                        console.log(error);      
+                    }).catch( error => {   
                         this.errorMessage = error.response.data["message"];                 
                         this.showError = true;
                 })}           
 
-                }).catch( error => {
-                    /*eslint-disable*/
-                    console.log(error);      
+                }).catch( error => {   
                     this.errorMessage = error.response.data["message"];                 
                     this.showError = true;
-                    /*eslint-enable*/
         })},
 
         addDisease(){
@@ -248,17 +240,12 @@ export default {
             this.addPenyakit = true;
 
             axios({ method: "POST", url: this.port+"/v1/disease/add", data: data_pass, headers: {"content-type": "text/plain" } }).then(result => { 
-                    console.log(result.data["message"])
                     this.succMessage = result.data["message"];
 
-                    /*eslint-enable*/
                     this.showResult = true;
-                    }).catch( error => {
-                        /*eslint-disable*/
-                        console.log(error);      
+                    }).catch( error => {    
                         this.errorMessage = error.response.data["message"];                 
                         this.showError = true;
-                        /*eslint-enable*/
             })},
 
         searchQuery(){
@@ -269,11 +256,7 @@ export default {
             } else {
 
                 var query = "?query=" + this.searchQueryInput;
-                console.log(this.tanggal)
-                console.log(this.namaPenyakit)
-                console.log(this.port)
                     axios({ method: "GET", url: this.port+"/v1/searching/predictionResult"+query, headers: {"content-type": "text/plain" } }).then(result => { 
-                    console.log(result)
                     this.queryEntered = true;
                     this.arrPenyakit = result.data["predictions"];
                     this.queryLength = result.data["predictions"].length;
@@ -284,11 +267,8 @@ export default {
 
                     this.showResult = true;
                     }).catch( error => {
-                        /*eslint-disable*/
-                        console.log(error);
                         this.errorMessage = error.response.data["message"];                 
                         this.showError = true;      
-                        /*eslint-enable*/
                 })}
                 this.displayPrevNext();
             
@@ -321,9 +301,6 @@ export default {
         },
 
         displayPrevNext() {
-            console.log(this.lowIndex)
-            console.log(this.lowIndex + this.dataPerPage)
-            console.log(this.queryLength)
             if (this.lowIndex + this.dataPerPage >= this.queryLength) {
                 this.displayNext = false;
             } else {
@@ -337,15 +314,7 @@ export default {
         },
         
         
-    },
-    mounted(){
-        // fetch('http://localhost:3000/image')        //Load data pada server json saat pertama kali website dinyalakan
-        //     .then(res=>res.json())
-        //     .then(data=>this.test = data)
-        //     .catch(err=>console.log(err.message))
-        // this.reset()
-    },
-    
+    }, 
 
 }
 </script>
@@ -518,8 +487,3 @@ export default {
         text-align: center;
     }
 </style>
-
-
-
-
-     
